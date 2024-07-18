@@ -14,11 +14,51 @@ class Review:
         self.summary = summary
         self.employee_id = employee_id
 
+    @property
+    def year(self):
+        return self._year
+
+    @year.setter
+    def year(self, value):
+        if not isinstance(value, int):
+            raise ValueError("Year must be an integer")
+        if value < 2000:
+            raise ValueError("Year must be 2000 or later")
+        self._year = value
+
+    @property
+    def summary(self):
+        return self._summary
+
+    @summary.setter
+    def summary(self, value):
+        if not value:
+            raise ValueError("Summary cannot be empty")
+        self._summary = value
+
+    @property
+    def employee_id(self):
+        return self._employee_id
+
+    @employee_id.setter
+    def employee_id(self, value):
+        if not isinstance(value, int):
+            raise ValueError("Employee ID must be an integer")
+
+        # Check if the employee ID exists in the employees table
+        sql = "SELECT id FROM employees WHERE id = ?"
+        result = CURSOR.execute(sql, (value,)).fetchone()
+        if not result:
+            raise ValueError("Employee ID does not exist in the employees table")
+
+        self._employee_id = value
+
     def __repr__(self):
         return (
             f"<Review {self.id}: {self.year}, {self.summary}, "
             + f"Employee: {self.employee_id}>"
         )
+
 
     @classmethod
     def create_table(cls):
@@ -146,5 +186,3 @@ class Review:
         rows = CURSOR.execute(sql).fetchall()
 
         return [cls.instance_from_db(row) for row in rows]
-        
-
